@@ -7,7 +7,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 dotenv.config();
 
 const mode = process.env.NODE_ENV || 'development';
-console.log(process.env.DEV_SERVER_PORT);
+
 module.exports = {
   mode: mode,
   entry: './src/index.tsx',
