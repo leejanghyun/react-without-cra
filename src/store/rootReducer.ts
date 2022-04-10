@@ -1,7 +1,7 @@
 import { combineReducers } from '@reduxjs/toolkit';
-import toDoListReducer from '@/store/test';
+import test from '@/store/test';
+// import testReducer1 from '@/store/test1';
 
-const reducer = combineReducers({ toDoListReducer });
-
-export type ReducerType = ReturnType<typeof reducer>;
-export default reducer;
+const rootReducer = combineReducers({ test /** ,testReducer1*/ });
+export type ReducerType = ReturnType<typeof rootReducer>;
+export default rootReducer;
