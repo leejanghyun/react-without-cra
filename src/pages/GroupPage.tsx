@@ -50,6 +50,7 @@ const GroupPage = () => {
           const aStream = dest.stream;
           const sourceNode = audioCtx.createMediaElementSource(localMediaView);
           sourceNode.connect(dest);
+          sourceNode.connect(audioCtx.destination);
 
           record(localCanvas, managerRecordedChunks, aStream);
 

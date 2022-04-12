@@ -73,14 +73,15 @@ export const donwload = (recordedChunks) => {
 };
 
 export const record = (canvas: HTMLCanvasElement, recordedChunks: any[], aStream) => {
-  const stream = canvas.captureStream(25 /*fps*/);
-  stream.addTrack(aStream.getAudioTracks()[0]);
-
-  const mediaRecorder = new MediaRecorder(stream, {
+  // const stream = canvas.captureStream(25 /*fps*/);
+  // stream.addTrack(aStream.getAudioTracks()[0]);
+  const mixedStream = new MediaStream([
+    canvas.captureStream(25 /*fps*/).getVideoTracks()[0],
+    aStream.getAudioTracks()[0],
+  ]);
+  const mediaRecorder = new MediaRecorder(mixedStream, {
     mimeType: 'video/webm; codecs=vp9',
   });
-
-  stream.getAudioTracks().forEach((track) => stream.addTrack(track));
 
   mediaRecorder.start(100);
 

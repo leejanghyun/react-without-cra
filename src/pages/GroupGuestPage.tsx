@@ -65,6 +65,7 @@ const GroupGuestPage = () => {
           // connect our video element's output to the stream
           const sourceNode = audioCtx.createMediaElementSource(remoteMediaView);
           sourceNode.connect(dest);
+          sourceNode.connect(audioCtx.destination);
 
           record(remoteCanvas, managerRecordedChunks, aStream);
 
