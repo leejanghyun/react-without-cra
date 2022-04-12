@@ -35,9 +35,6 @@ const GroupGuestPage = () => {
         localCanvas.addEventListener('click', exit, false);
         remoteCanvas.addEventListener('click', exit, false);
 
-        record(localCanvas, guestRecordedChunks);
-        record(remoteCanvas, managerRecordedChunks);
-
         await room.enter({
           videoEnabled: true,
           audioEnabled: true,
@@ -45,11 +42,31 @@ const GroupGuestPage = () => {
         localMediaView = document.getElementById('local_video_element_id') as HTMLMediaElement;
         await room.localParticipant.setMediaView(localMediaView);
 
+        var audioCtx = new AudioContext();
+        // create a stream from our AudioContext
+        var dest = audioCtx.createMediaStreamDestination();
+        const aStream = dest.stream;
+        // connect our video element's output to the stream
+        var sourceNode = audioCtx.createMediaElementSource(localMediaView);
+        sourceNode.connect(dest);
+
+        record(localCanvas, guestRecordedChunks, aStream);
+
         drawMediaToCanvas(localMediaView, localCanvas, 0, 0, 450, 450, '고객💊'); // [local canvas]
 
         room.on('remoteParticipantStreamStarted', async (remoteParticipant) => {
           remoteMediaView = document.getElementById('remote_video_element_id') as HTMLMediaElement;
           await remoteParticipant.setMediaView(remoteMediaView);
+
+          var audioCtx = new AudioContext();
+          // create a stream from our AudioContext
+          var dest = audioCtx.createMediaStreamDestination();
+          const aStream = dest.stream;
+          // connect our video element's output to the stream
+          var sourceNode = audioCtx.createMediaElementSource(remoteMediaView);
+          sourceNode.connect(dest);
+
+          record(remoteCanvas, managerRecordedChunks, aStream);
 
           drawMediaToCanvas(remoteMediaView, remoteCanvas, 0, 0, 450, 450, '상담원🥰'); // [remote canvas]
           drawMediaToCanvas(localMediaView as HTMLMediaElement, remoteCanvas, 300, 0, 150, 150); // [remote canvas]
@@ -67,8 +84,8 @@ const GroupGuestPage = () => {
         <button onClick={() => donwload(managerRecordedChunks)}>상담원 녹음 기록</button>
         <button onClick={() => donwload(guestRecordedChunks)}>고객 녹음 기록</button>
       </div>
-      <video height="100" width="100" id="local_video_element_id" autoPlay muted loop></video>
-      <video height="100" width="100" id="remote_video_element_id" autoPlay muted loop></video>
+      <video height="100" width="100" id="local_video_element_id" autoPlay loop></video>
+      <video height="100" width="100" id="remote_video_element_id" autoPlay loop></video>
       <canvas id="local_canvas_element_id" width="450" height="450"></canvas>
       <canvas id="remote_canvas_element_id" width="450" height="450"></canvas>
     </Overlay>
