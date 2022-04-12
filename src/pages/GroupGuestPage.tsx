@@ -42,12 +42,12 @@ const GroupGuestPage = () => {
         localMediaView = document.getElementById('local_video_element_id') as HTMLMediaElement;
         await room.localParticipant.setMediaView(localMediaView);
 
-        var audioCtx = new AudioContext();
+        const audioCtx = new AudioContext();
         // create a stream from our AudioContext
-        var dest = audioCtx.createMediaStreamDestination();
+        const dest = audioCtx.createMediaStreamDestination();
         const aStream = dest.stream;
         // connect our video element's output to the stream
-        var sourceNode = audioCtx.createMediaElementSource(localMediaView);
+        const sourceNode = audioCtx.createMediaElementSource(localMediaView);
         sourceNode.connect(dest);
 
         record(localCanvas, guestRecordedChunks, aStream);
@@ -58,12 +58,12 @@ const GroupGuestPage = () => {
           remoteMediaView = document.getElementById('remote_video_element_id') as HTMLMediaElement;
           await remoteParticipant.setMediaView(remoteMediaView);
 
-          var audioCtx = new AudioContext();
+          const audioCtx = new AudioContext();
           // create a stream from our AudioContext
-          var dest = audioCtx.createMediaStreamDestination();
+          const dest = audioCtx.createMediaStreamDestination();
           const aStream = dest.stream;
           // connect our video element's output to the stream
-          var sourceNode = audioCtx.createMediaElementSource(remoteMediaView);
+          const sourceNode = audioCtx.createMediaElementSource(remoteMediaView);
           sourceNode.connect(dest);
 
           record(remoteCanvas, managerRecordedChunks, aStream);
