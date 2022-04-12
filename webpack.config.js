@@ -1,5 +1,6 @@
 const path = require('path');
 const dotenv = require('dotenv');
+const fs = require('fs');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { TsconfigPathsPlugin } = require('tsconfig-paths-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -61,11 +62,14 @@ module.exports = {
     extensions: ['.tsx', '.ts', '.js'],
   },
   devServer: {
-    host: 'localhost',
     port: process.env.DEV_SERVER_PORT,
     hot: true,
     open: true,
     historyApiFallback: true,
+    https: {
+      key: fs.readFileSync('./certificates/localhost.key'),
+      cert: fs.readFileSync('./certificates/localhost.crt'),
+    },
   },
   devtool: 'source-map',
   plugins: [
