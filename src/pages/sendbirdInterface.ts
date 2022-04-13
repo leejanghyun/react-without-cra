@@ -73,14 +73,13 @@ export const donwload = (recordedChunks) => {
 };
 
 export const record = (video: HTMLMediaElement, canvas: HTMLCanvasElement, recordedChunks: any[]) => {
-  const vStream = canvas.captureStream(100);
-  const aStream = (video as any).captureStream(100).getAudioTracks()[0];
+  const vStream = canvas.captureStream(60);
+  const aStream = (video as any).captureStream(60).getAudioTracks()[0];
   vStream.addTrack(aStream);
   const mediaRecorder = new MediaRecorder(vStream, {
     mimeType: 'video/webm; codecs=vp9',
   });
   mediaRecorder.start(100);
-
   mediaRecorder.ondataavailable = function (event) {
     recordedChunks.push(event.data);
   };
