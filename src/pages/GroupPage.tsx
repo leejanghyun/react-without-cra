@@ -19,14 +19,14 @@ const GroupPage = () => {
       roomType: SendBirdCall.RoomType.SMALL_ROOM_FOR_VIDEO,
     }).then((room) => {
       currentRoom = room;
-      let localMediaView = document.getElementById('local_video_element_id') as HTMLMediaElement;
-      let remoteMediaView = document.getElementById('remote_video_element_id') as HTMLMediaElement;
       alert(room.roomId);
       console.log(room.roomId);
 
       SendBirdCall.fetchRoomById(room.roomId).then((room) => {
         const localCanvas = document.getElementById('local_canvas_element_id') as HTMLCanvasElement;
         const remoteCanvas = document.getElementById('remote_canvas_element_id') as HTMLCanvasElement;
+        let localMediaView = document.getElementById('local_video_element_id') as HTMLMediaElement;
+        let remoteMediaView = document.getElementById('remote_video_element_id') as HTMLMediaElement;
 
         const exit = (e) => {
           if (e.offsetX >= 20 && e.offsetX <= 100 && e.offsetY >= 260 && e.offsetY <= 350) {
@@ -46,19 +46,20 @@ const GroupPage = () => {
           await room.localParticipant.setMediaView(localMediaView);
 
           localMediaView.addEventListener('play', () => {
-            record(localMediaView, localCanvas, managerRecordedChunks);
+            //record(localMediaView, localCanvas, managerRecordedChunks);
             drawMediaToCanvas(localMediaView, localCanvas, 0, 0, 450, 450, '상담원🥰');
           });
         });
         // 사용자 입장
         room.on('remoteParticipantEntered', async (remoteParticipant) => {
+          remoteMediaView = document.getElementById('remote_video_element_id') as HTMLMediaElement;
           await remoteParticipant.setMediaView(remoteMediaView);
 
           remoteMediaView.addEventListener('play', () => {
-            record(remoteMediaView, remoteCanvas, guestRecordedChunks);
             drawMediaToCanvas(remoteMediaView, remoteCanvas, 0, 0, 450, 450, '고객💊');
             drawMediaToCanvas(localMediaView as HTMLMediaElement, remoteCanvas, 300, 0, 150, 150);
             drawMediaToCanvas(remoteMediaView, localCanvas, 300, 0, 150, 150);
+            record(remoteMediaView, remoteCanvas, guestRecordedChunks);
           });
         });
       });
@@ -70,11 +71,10 @@ const GroupPage = () => {
     <Overlay>
       <div>
         group page
-        <button onClick={() => donwload(managerRecordedChunks)}>상담원 녹음 기록</button>
         <button onClick={() => donwload(guestRecordedChunks)}>고객 녹음 기록</button>
       </div>
       <video height="100" width="100" id="local_video_element_id" autoPlay muted></video>
-      <video height="100" width="100" id="remote_video_element_id" autoPlay></video>
+      <video height="100" width="100" id="remote_video_element_id" autoPlay loop></video>
       <canvas id="local_canvas_element_id" width="450" height="450"></canvas>
       <canvas id="remote_canvas_element_id" width="450" height="450"></canvas>
     </Overlay>

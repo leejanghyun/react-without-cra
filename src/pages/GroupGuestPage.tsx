@@ -42,7 +42,7 @@ const GroupGuestPage = () => {
         await room.localParticipant.setMediaView(localMediaView);
 
         localMediaView.addEventListener('play', () => {
-          record(localMediaView, localCanvas, guestRecordedChunks);
+          //record(localMediaView, localCanvas, guestRecordedChunks);
           drawMediaToCanvas(localMediaView, localCanvas, 0, 0, 450, 450, '고객💊'); // [local canvas]
         });
 
@@ -65,7 +65,6 @@ const GroupGuestPage = () => {
       <div>
         guest page
         <button onClick={() => donwload(managerRecordedChunks)}>상담원 녹음 기록</button>
-        <button onClick={() => donwload(guestRecordedChunks)}>고객 녹음 기록</button>
       </div>
       <video height="100" width="100" id="local_video_element_id" autoPlay loop muted></video>
       <video height="100" width="100" id="remote_video_element_id" autoPlay loop></video>
