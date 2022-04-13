@@ -19,12 +19,12 @@ const GroupPage = () => {
       roomType: SendBirdCall.RoomType.SMALL_ROOM_FOR_VIDEO,
     }).then((room) => {
       currentRoom = room;
-      const ROOM_ID = room.roomId;
-      let localMediaView: null | HTMLMediaElement = null;
-      let remoteMediaView: null | HTMLMediaElement = null;
-      alert(ROOM_ID);
-      console.log(ROOM_ID);
-      SendBirdCall.fetchRoomById(ROOM_ID).then((room) => {
+      let localMediaView = document.getElementById('local_video_element_id') as HTMLMediaElement;
+      let remoteMediaView = document.getElementById('remote_video_element_id') as HTMLMediaElement;
+      alert(room.roomId);
+      console.log(room.roomId);
+
+      SendBirdCall.fetchRoomById(room.roomId).then((room) => {
         const localCanvas = document.getElementById('local_canvas_element_id') as HTMLCanvasElement;
         const remoteCanvas = document.getElementById('remote_canvas_element_id') as HTMLCanvasElement;
 
@@ -41,37 +41,25 @@ const GroupPage = () => {
           audioEnabled: true,
         };
 
-        room.enter(enterParams).then(() => {
-          localMediaView = document.getElementById('local_video_element_id') as HTMLMediaElement;
-          room.localParticipant.setMediaView(localMediaView);
+        // 상담원 방 입장
+        room.enter(enterParams).then(async () => {
+          await room.localParticipant.setMediaView(localMediaView);
 
-          const audioCtx = new AudioContext();
-          const dest = audioCtx.createMediaStreamDestination();
-          const aStream = dest.stream;
-          const sourceNode = audioCtx.createMediaElementSource(localMediaView);
-          sourceNode.connect(dest);
-
-          record(localCanvas, managerRecordedChunks, aStream);
-
-          drawMediaToCanvas(localMediaView, localCanvas, 0, 0, 450, 450, '상담원🥰'); // [local canvas]
+          localMediaView.addEventListener('play', () => {
+            record(localMediaView, localCanvas, managerRecordedChunks);
+            drawMediaToCanvas(localMediaView, localCanvas, 0, 0, 450, 450, '상담원🥰');
+          });
         });
-
+        // 사용자 입장
         room.on('remoteParticipantEntered', async (remoteParticipant) => {
-          remoteMediaView = document.getElementById('remote_video_element_id') as HTMLMediaElement;
           await remoteParticipant.setMediaView(remoteMediaView);
 
-          var audioCtx = new AudioContext();
-          // create a stream from our AudioContext
-          var dest = audioCtx.createMediaStreamDestination();
-          const aStream = dest.stream;
-          // connect our video element's output to the stream
-          var sourceNode = audioCtx.createMediaElementSource(remoteMediaView);
-          sourceNode.connect(dest);
-          record(remoteCanvas, guestRecordedChunks, aStream);
-
-          drawMediaToCanvas(remoteMediaView, remoteCanvas, 0, 0, 450, 450, '고객💊'); // [remote canvas]
-          drawMediaToCanvas(localMediaView as HTMLMediaElement, remoteCanvas, 300, 0, 150, 150); // [remote canvas]
-          drawMediaToCanvas(remoteMediaView, localCanvas, 300, 0, 150, 150); // [local canvas]
+          remoteMediaView.addEventListener('play', () => {
+            record(remoteMediaView, remoteCanvas, guestRecordedChunks);
+            drawMediaToCanvas(remoteMediaView, remoteCanvas, 0, 0, 450, 450, '고객💊');
+            drawMediaToCanvas(localMediaView as HTMLMediaElement, remoteCanvas, 300, 0, 150, 150);
+            drawMediaToCanvas(remoteMediaView, localCanvas, 300, 0, 150, 150);
+          });
         });
       });
     });
@@ -85,8 +73,8 @@ const GroupPage = () => {
         <button onClick={() => donwload(managerRecordedChunks)}>상담원 녹음 기록</button>
         <button onClick={() => donwload(guestRecordedChunks)}>고객 녹음 기록</button>
       </div>
-      <video height="100" width="100" id="local_video_element_id" autoPlay loop></video>
-      <video height="100" width="100" id="remote_video_element_id" autoPlay loop></video>
+      <video height="100" width="100" id="local_video_element_id" autoPlay muted></video>
+      <video height="100" width="100" id="remote_video_element_id" autoPlay></video>
       <canvas id="local_canvas_element_id" width="450" height="450"></canvas>
       <canvas id="remote_canvas_element_id" width="450" height="450"></canvas>
     </Overlay>
