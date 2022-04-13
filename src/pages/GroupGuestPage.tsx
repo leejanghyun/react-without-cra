@@ -14,18 +14,17 @@ const GroupGuestPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const ROOM_ID = searchParams.get('roomid') || '';
   let currentRoom: SendBirdCall.Room | null = null;
-  let localMediaView: null | HTMLMediaElement = null;
-  let remoteMediaView: null | HTMLMediaElement = null;
   let guestRecordedChunks = [];
   let managerRecordedChunks = [];
 
   const dial = async () => {
     SendBirdCall.fetchRoomById(ROOM_ID)
       .then(async (room) => {
-        currentRoom = room;
+        let localMediaView = document.getElementById('local_video_element_id') as HTMLMediaElement;
+        let remoteMediaView = document.getElementById('remote_video_element_id') as HTMLMediaElement;
         const localCanvas = document.getElementById('local_canvas_element_id') as HTMLCanvasElement;
-
         const remoteCanvas = document.getElementById('remote_canvas_element_id') as HTMLCanvasElement;
+        currentRoom = room;
 
         const exit = (e) => {
           if (e.offsetX >= 20 && e.offsetX <= 100 && e.offsetY >= 260 && e.offsetY <= 350) {
@@ -35,40 +34,23 @@ const GroupGuestPage = () => {
         localCanvas.addEventListener('click', exit, false);
         remoteCanvas.addEventListener('click', exit, false);
 
+        // 사용자 방 입장
         await room.enter({
           videoEnabled: true,
           audioEnabled: true,
         });
-        localMediaView = document.getElementById('local_video_element_id') as HTMLMediaElement;
         await room.localParticipant.setMediaView(localMediaView);
 
-        const audioCtx = new AudioContext();
-        // create a stream from our AudioContext
-        const dest = audioCtx.createMediaStreamDestination();
-        const aStream = dest.stream;
-        // connect our video element's output to the stream
-        const sourceNode = audioCtx.createMediaElementSource(localMediaView);
-        sourceNode.connect(dest);
+        localMediaView.addEventListener('play', () => {
+          record(localMediaView, localCanvas, guestRecordedChunks);
+          drawMediaToCanvas(localMediaView, localCanvas, 0, 0, 450, 450, '고객💊'); // [local canvas]
+        });
 
-        record(localCanvas, guestRecordedChunks, aStream);
-
-        drawMediaToCanvas(localMediaView, localCanvas, 0, 0, 450, 450, '고객💊'); // [local canvas]
-
+        // 상담원 방 입장
         room.on('remoteParticipantStreamStarted', async (remoteParticipant) => {
-          remoteMediaView = document.getElementById('remote_video_element_id') as HTMLMediaElement;
           await remoteParticipant.setMediaView(remoteMediaView);
 
-          const audioCtx = new AudioContext();
-          // create a stream from our AudioContext
-          const dest = audioCtx.createMediaStreamDestination();
-          const aStream = dest.stream;
-          // connect our video element's output to the stream
-          const sourceNode = audioCtx.createMediaElementSource(remoteMediaView);
-          sourceNode.connect(dest);
-          sourceNode.connect(audioCtx.destination);
-
-          record(remoteCanvas, managerRecordedChunks, aStream);
-
+          record(remoteMediaView, remoteCanvas, managerRecordedChunks);
           drawMediaToCanvas(remoteMediaView, remoteCanvas, 0, 0, 450, 450, '상담원🥰'); // [remote canvas]
           drawMediaToCanvas(localMediaView as HTMLMediaElement, remoteCanvas, 300, 0, 150, 150); // [remote canvas]
           drawMediaToCanvas(remoteMediaView, localCanvas, 300, 0, 150, 150); // [local canvas]
@@ -85,7 +67,7 @@ const GroupGuestPage = () => {
         <button onClick={() => donwload(managerRecordedChunks)}>상담원 녹음 기록</button>
         <button onClick={() => donwload(guestRecordedChunks)}>고객 녹음 기록</button>
       </div>
-      <video height="100" width="100" id="local_video_element_id" autoPlay loop></video>
+      <video height="100" width="100" id="local_video_element_id" autoPlay loop muted></video>
       <video height="100" width="100" id="remote_video_element_id" autoPlay loop></video>
       <canvas id="local_canvas_element_id" width="450" height="450"></canvas>
       <canvas id="remote_canvas_element_id" width="450" height="450"></canvas>

@@ -72,21 +72,16 @@ export const donwload = (recordedChunks) => {
   window.URL.revokeObjectURL(url);
 };
 
-export const record = (canvas: HTMLCanvasElement, recordedChunks: any[], aStream) => {
-  // const stream = canvas.captureStream(25 /*fps*/);
-  // stream.addTrack(aStream.getAudioTracks()[0]);
-  const mixedStream = new MediaStream([
-    canvas.captureStream(25 /*fps*/).getVideoTracks()[0],
-    aStream.getAudioTracks()[0],
-  ]);
-  const mediaRecorder = new MediaRecorder(mixedStream, {
+export const record = (video: HTMLMediaElement, canvas: HTMLCanvasElement, recordedChunks: any[]) => {
+  const vStream = canvas.captureStream(5);
+  const aStream = (video as any).captureStream(5).getAudioTracks()[0];
+  vStream.addTrack(aStream);
+  const mediaRecorder = new MediaRecorder(vStream, {
     mimeType: 'video/webm; codecs=vp9',
   });
-
   mediaRecorder.start(100);
 
   mediaRecorder.ondataavailable = function (event) {
     recordedChunks.push(event.data);
-    console.log(recordedChunks.length);
   };
 };
